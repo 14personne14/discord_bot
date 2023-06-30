@@ -1,4 +1,5 @@
 import platform
+import discord
 import asyncio
 from logging import DEBUG, INFO, getLogger, Formatter, FileHandler, StreamHandler, Logger
 from os import listdir
@@ -7,13 +8,27 @@ from json import load as load_json
 from classes.discordbot import DiscordBot
 
 
+COLORS = {
+    "red": discord.Colour.from_rgb(255, 0, 0).value,
+    "green": discord.Colour.from_rgb(0, 255, 0).value,
+    "blue": discord.Colour.from_rgb(0, 0, 255).value,
+    "yellow": discord.Colour.from_rgb(255, 255, 0).value,
+    "sky blue": discord.Colour.from_rgb(0, 255, 255).value,
+    "violet": discord.Colour.from_rgb(255, 0, 255).value,
+    "black": discord.Colour.from_rgb(0, 0, 0).value,
+    "white": discord.Colour.from_rgb(255, 255, 255).value,
+    "gray": discord.Colour.from_rgb(128, 128, 128).value
+}
+"""The colour for discord.py"""
+
+
 def extract_json(path_file: str) -> dict:
     """Extract data from json file
 
     Returns:
         dict: The data of json file
     """
-    
+
     with open(path_file, "r") as file:
         return load_json(file)
 
@@ -27,7 +42,7 @@ def get_list_cogs(path_folder: str) -> list[str]:
     Returns:
         list[str]: The list of all cogs name 
     """
-    
+
     list_cogs = []
     for filename in listdir(path_folder):
         if filename.endswith('.py'):
@@ -35,7 +50,7 @@ def get_list_cogs(path_folder: str) -> list[str]:
     return list_cogs
 
 
-async def cogs_manager(bot: DiscordBot, mode: str, cogs: list[str]) -> None:
+async def cogs_manager(bot: DiscordBot, mode: str, cogs: list[str]):
     """Manage a cog (load, realod, unload)
 
     Args:
@@ -47,7 +62,7 @@ async def cogs_manager(bot: DiscordBot, mode: str, cogs: list[str]) -> None:
         ValueError: The mode is not valid 
         err: Error for load, unload or reload
     """
-    
+
     for cog in cogs:
         try:
             if mode == "unload":
@@ -63,10 +78,10 @@ async def cogs_manager(bot: DiscordBot, mode: str, cogs: list[str]) -> None:
             raise err
 
 
-def clean_close() -> None:
+def clean_close():
     """Avoid Windows EventLoopPolicy Error
     """
-    
+
     if platform.system().lower() == 'windows':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -83,18 +98,21 @@ def set_logging(file_level: int = DEBUG, console_level: int = INFO, filename: st
         tuple[Logger, StreamHandler]: The logger and the console handler. 
     """
 
-    logger = getLogger("discord")  # discord.py logger
+    logger = getLogger("discord")  # get discord.py logger
     logger.setLevel(DEBUG)
     log_formatter = Formatter(
-        fmt="[{asctime}] [{levelname:<8}] {name}: {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
+        fmt="[{asctime}] [{levelname:<8}] {name}: {message}",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        style="{"
+    )
 
-    # File-logs
-    file_handler = FileHandler(filename=filename, encoding="utf-8", mode='w')
+    # Logs for file
+    file_handler = FileHandler(filename=filename, encoding="utf-8", mode='a')
     file_handler.setFormatter(log_formatter)
     file_handler.setLevel(file_level)
     logger.addHandler(file_handler)
 
-    # Console-logs
+    # Logs for console
     console_handler = StreamHandler()
     console_handler.setFormatter(log_formatter)
     console_handler.setLevel(console_level)

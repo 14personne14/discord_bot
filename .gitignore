@@ -131,4 +131,5 @@ help/
 desktop.ini
 test/ 
 tests/
-discord.log
+logs/
+*.log

@@ -3,22 +3,21 @@ from datetime import datetime
 from discord import __version__ as discord_version
 from discord.ext import commands
 from logging import Logger
-from logging import INFO
+from logging import INFO, ERROR
 
 
 class DiscordBot(commands.Bot):
     """A Subclass of `commands.Bot` to do more things."""
 
-    def __init__(self, data) -> None:
+    def __init__(self, data):
         """Initialise le bot
 
         Raises:
             ValueError: _description_
         """
-        self.data = data
 
-        self.uptime: datetime = datetime.now()
-        """Bot's uptime."""
+        self.data = data
+        self.start_time = datetime.now()
 
         super().__init__(
             command_prefix=self.data["default_prefix"],
@@ -29,7 +28,7 @@ class DiscordBot(commands.Bot):
             status=discord.Status.online,
         )
 
-    def log(self, message: str, name: str, level: int = INFO, **kwargs) -> None:
+    def log(self, message: str, name: str, level: int = INFO, **kwargs):
         """Log a message to the console and the log file.
 
         Args:
@@ -38,20 +37,26 @@ class DiscordBot(commands.Bot):
             level (int, optional): The level of the log message. Defaults to INFO.
         """
 
-        logger: Logger
         self.logger.name = name
         self.logger.log(level=level, msg=message, **kwargs)
 
-    async def on_ready(self) -> None:
+    async def on_ready(self):
         """When the bot is ready. 
         """
 
         self.log(
-            message=f"Logged as: {self.user} | Version: discord.py{discord_version} | Number_Guilds: {len(self.guilds)} | Number_Users: {len(self.users)}", name="discord.on_ready")
+            message=f"Bot is ready | Logged as: {self.user} | Version discord.py: {discord_version} | Number_Guilds: {len(self.guilds)} | Number_Users: {len(self.users)}",
+            name="discord.on_ready"
+        )
+        self.log(
+			message = type(ValueError).__name__,
+			name = f"discord.coucou",
+			level = ERROR,
+			exc_info = "erreur de la mort qui tue ",
+		)
 
-    async def setup_hook(self) -> None:
+    async def setup_hook(self):
         """Retrieve the bot's application info.
         """
 
         self.appinfo = await self.application_info()
-        """Application info for the bot provided by Discord."""
