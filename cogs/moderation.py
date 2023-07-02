@@ -11,7 +11,7 @@ from datetime import timedelta
 
 
 @app_commands.guild_only()
-class Moderation(commands.GroupCog, name="moderation", group_name="moderation", group_description="La modération pour les serveurs."):
+class Moderation(commands.Cog, name="moderation"):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
     

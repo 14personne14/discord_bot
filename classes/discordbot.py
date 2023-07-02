@@ -4,6 +4,9 @@ from discord import __version__ as discord_version
 from discord.ext import commands
 from logging import Logger
 from logging import INFO, ERROR
+from classes.database import Database
+from os import getenv
+from views.persistence import PersistentView
 
 
 class DiscordBot(commands.Bot):
@@ -18,9 +21,15 @@ class DiscordBot(commands.Bot):
 
         self.data = data
         self.start_time = datetime.now()
+        # self.database = Database(
+        #     host='mysql.seb.docker.ras.univ-angers.fr',
+        #     username='eloilag',
+        #     password=getenv('MDP_DATABASE'),
+        #     database_name='eloilag'
+        # )
 
         super().__init__(
-            command_prefix=self.data["default_prefix"],
+            command_prefix=commands.when_mentioned_or(self.data["default_prefix"]),
             activity=discord.Game(name=self.data["default_activity"]),
             intents=discord.Intents.all(),
             case_insensitive=True,
@@ -60,3 +69,4 @@ class DiscordBot(commands.Bot):
         """
 
         self.appinfo = await self.application_info()
+        self.add_view(PersistentView())

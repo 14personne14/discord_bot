@@ -12,7 +12,7 @@ class Bot(DiscordBot):
     """
 
     def __init__(self):
-        data = extract_json(getenv('DATA_PATH'))
+        data = extract_json('./config/bot.json')
         super().__init__(data)
 
     async def startup(self):
