@@ -1,13 +1,16 @@
+# Discord
 import discord
-import asyncio
 from discord.ext import commands
 from discord import app_commands
 
-from classes.discordbot import DiscordBot
-from views.tu_prefere import ModalTuPrefere
-from classes.utils import COLORS, extract_json
+# Other
+import asyncio
 from typing import Optional
 from datetime import timedelta
+
+# My import 
+from classes.discordbot import DiscordBot
+from classes.utils import COLORS, extract_json
 
 
 @app_commands.guild_only()

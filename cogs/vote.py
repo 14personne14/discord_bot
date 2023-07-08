@@ -1,11 +1,15 @@
+# Discord
 import discord
-import asyncio
 from discord.ext import commands
 from discord import app_commands
 
+# Other
+import asyncio
+
+# My import 
 from classes.discordbot import DiscordBot
-from views.tu_prefere import ModalTuPrefere
 from classes.utils import COLORS
+from views.modal import TuPrefere
 
 
 @app_commands.guild_only()
@@ -16,7 +20,7 @@ class Vote(commands.GroupCog, name="vote", group_name="vote", group_description=
     @app_commands.command(name="tu_prefere", description="Sondage 'tu prefere' entre 2 choix.")
     @app_commands.guild_only()
     async def tu_prefere(self, interaction: discord.Interaction):
-        modal = ModalTuPrefere()
+        modal = TuPrefere()
         await interaction.response.send_modal(modal)
         await modal.wait()
         

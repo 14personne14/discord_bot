@@ -1,11 +1,15 @@
+# Discord
 import discord
-import asyncio
 from discord.ext import commands
 from discord import app_commands
 
+# Other
+import asyncio
+from typing import Optional
+
+# My import
 from classes.discordbot import DiscordBot
 from classes.utils import COLORS
-from typing import Optional
 
 
 class Info(commands.GroupCog, name="info", group_name="info", group_description="Pour gérer les votes !"):

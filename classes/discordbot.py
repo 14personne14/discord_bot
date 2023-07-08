@@ -3,7 +3,7 @@ from datetime import datetime
 from discord import __version__ as discord_version
 from discord.ext import commands
 from logging import Logger
-from logging import INFO, ERROR
+from logging import INFO
 from classes.database import Database
 from os import getenv
 from views.persistence import PersistentView
@@ -18,15 +18,16 @@ class DiscordBot(commands.Bot):
         Raises:
             ValueError: _description_
         """
-
+        
         self.data = data
         self.start_time = datetime.now()
-        # self.database = Database(
-        #     host='mysql.seb.docker.ras.univ-angers.fr',
-        #     username='eloilag',
-        #     password=getenv('MDP_DATABASE'),
-        #     database_name='eloilag'
-        # )
+        self.database = Database(
+            host='seb_mysql_db',
+            username='eloilag',
+            password=getenv('MDP_DATABASE'),
+            database_name='eloilag', 
+            log=self.log
+        )
 
         super().__init__(
             command_prefix=commands.when_mentioned_or(self.data["default_prefix"]),
@@ -54,15 +55,9 @@ class DiscordBot(commands.Bot):
         """
 
         self.log(
-            message=f"Bot is ready | Logged as: {self.user} | Version discord.py: {discord_version} | Number_Guilds: {len(self.guilds)} | Number_Users: {len(self.users)}",
+            message=f"Bot is ready | Logged as: {self.user} | Version discord.py: {discord_version} | Number_Guilds: {len(self.guilds)} | Number_Users: {len(self.users)} | Connected to database : {print(self.database.is_connected())}",
             name="discord.on_ready"
         )
-        self.log(
-			message = type(ValueError).__name__,
-			name = f"discord.coucou",
-			level = ERROR,
-			exc_info = "erreur de la mort qui tue ",
-		)
 
     async def setup_hook(self):
         """Retrieve the bot's application info.
