@@ -24,46 +24,57 @@ class Role(commands.Cog, name="Role"):
     async def setup(self, interaction: discord.Interaction, choices: app_commands.Choice[str]):
         if choices.value == "channel_role":
             hierarchy = interaction.guild.by_category()
-            select_options = []
-            second_select_options = {}
+            categories_options = []
+            channels_options = {}
+            
             for category, channels in hierarchy:
-                good_text_channel = False
+                at_least_one_text_channel = False
+                
+                # Add channels in dict
                 for channel in channels:
                     if isinstance(channel, discord.TextChannel):
-                        good_text_channel = True
-                        if str(category.id) in second_select_options:
-                            second_select_options[str(category.id)].append(discord.SelectOption(label = channel.name, description = f"id:{channel.id}", value=channel.id))
+                        at_least_one_text_channel = True
+                        if str(category.id) in channels_options:
+                            channels_options[str(category.id)].append(discord.SelectOption(label = channel.name, description = f"id:{channel.id}", value=str(channel.id)))
                         else:
-                            second_select_options[str(category.id)] = [ discord.SelectOption(label = channel.name, description = f"id:{channel.id}", value=channel.id) ]
-                if good_text_channel:
-                    select_options.append(discord.SelectOption(label = category.name, description = f"id:{category.id}", value=category.id))
+                            channels_options[str(category.id)] = [ discord.SelectOption(label = channel.name, description = f"id:{channel.id}", value=str(channel.id)) ]
+                
+                # Add categories in list
+                if at_least_one_text_channel:
+                    categories_options.append(discord.SelectOption(label = category.name, description = f"id:{category.id}", value=str(category.id)))
             
-            select = ViewTextChannel(select_options, second_select_options)
+            user_id = interaction.user.id
+            view = ViewTextChannel(categories_options, channels_options, user_id)
             dict_embed = {
-                'description': '🔷 Vous pouvez choisir ci-dessous une catégorie de salon.',
+                'description': '🔷 Vous pouvez choisir ci-dessous une **catégorie** de salon.',
                 'color': COLORS['blue'],
             }
             embed = discord.Embed.from_dict(dict_embed)
-            await interaction.response.send_message(embed=embed, view=select)
-            await select.wait()
+            await interaction.response.send_message(embed=embed, view=view)
+            await view.wait()
             
-            if select.channel != None:
-                req = self.bot.database.select(f"SELECT * FROM Guilds WHERE id={interaction.guild.id};")
-                if len(req) == 0:
-                    self.bot.database.insert(f"INSERT INTO Guilds (id, id_channel_role) VALUES ({interaction.guild.id}, {select.channel});")
-                else:
-                    self.bot.database.update(f"UPDATE Guilds SET id_channel_role = {select.channel} WHERE id = {interaction.guild.id};")
-                
-                dict_embed = {
-                    'description': f"✅ Le nouveau salon pour les roles est maintenant {self.bot.get_channel(int(select.channel)).mention}",
-                    'color': COLORS['green'],
-                }
-                embed = discord.Embed.from_dict(dict_embed)
-                await interaction.edit_original_response(embed=embed, view=None)
-            else:
+            # Timeout
+            if view.channel == None:
                 dict_embed = {
                     'description': f"❌ Le temps d'attente est dépassé.",
                     'color': COLORS['red'],
+                }
+                embed = discord.Embed.from_dict(dict_embed)
+                await interaction.edit_original_response(embed=embed, view=None)
+            # Update new role channel
+            else:
+                self.bot.database.insert_or_update(f"INSERT INTO Guilds (id, id_channel_role) VALUES ({interaction.guild.id}, {view.channel}) ON DUPLICATE KEY UPDATE id_channel_role = {view.channel}")
+                
+                new_channel = self.bot.get_channel(int(view.channel))
+                
+                self.bot.log(
+                    message=f"New role channel for guild '{interaction.guild.name}' : '{new_channel.name}'",
+                    name="discord.setup.channel_role"
+                )
+                
+                dict_embed = {
+                    'description': f"✅ Le nouveau salon pour les roles est maintenant {new_channel.mention}",
+                    'color': COLORS['green'],
                 }
                 embed = discord.Embed.from_dict(dict_embed)
                 await interaction.edit_original_response(embed=embed, view=None)

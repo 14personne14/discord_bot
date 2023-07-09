@@ -34,26 +34,16 @@ class Database():
         
         return result
 
-    def insert(self, request: str):
-        """Do a insert request to database
+    def insert_or_update(self, request: str):
+        """Do a insert or update request to database
 
         Args:
-            request (str): The insert request to do
+            request (str): The insert or update request to do
         """
         
         self.cursor.execute(request)
         self.database.commit()
-        
-    def update(self, request: str):
-        """Do a update request to database
-
-        Args:
-            request (str): The update request to do
-        """
-        
-        self.cursor.execute(request)
-        self.database.commit()
-        
+    
     def is_connected(self):
         """Check if the database is connected
         
